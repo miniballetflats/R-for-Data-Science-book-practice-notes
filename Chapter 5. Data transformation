@@ -1,0 +1,81 @@
+5 Data transformation
+
+library(nycflights13)
+library(tidyverse)
+
+flights
+
+# A tibble: 336,776 x 19
+    year month   day dep_time sched_dep_time dep_delay arr_time sched_arr_time arr_delay
+   <int> <int> <int>    <int>          <int>     <dbl>    <int>          <int>     <dbl>
+ 1  2013     1     1      517            515         2      830            819        11
+ 2  2013     1     1      533            529         4      850            830        20
+ 3  2013     1     1      542            540         2      923            850        33
+ 4  2013     1     1      544            545        -1     1004           1022       -18
+ 5  2013     1     1      554            600        -6      812            837       -25
+ 6  2013     1     1      554            558        -4      740            728        12
+ 7  2013     1     1      555            600        -5      913            854        19
+ 8  2013     1     1      557            600        -3      709            723       -14
+ 9  2013     1     1      557            600        -3      838            846        -8
+10  2013     1     1      558            600        -2      753            745         8
+# ... with 336,766 more rows, and 10 more variables: carrier <chr>, flight <int>,
+#   tailnum <chr>, origin <chr>, dest <chr>, air_time <dbl>, distance <dbl>, hour <dbl>,
+#   minute <dbl>, time_hour <dttm>
+
+This data frame contains all 336,776 flights that 
+departed from New York City in 2013. 
+The data comes from the US Bureau of Transportation Statistics, 
+and is documented in ?flights.
+
+#int stands for integers.
+#dbl stands for doubles, or real numbers.
+#chr stands for character vectors, or strings.
+#dttm stands for date-times (a date + a time).
+
+#lgl stands for logical, vectors that contain only TRUE or FALSE.
+#fctr stands for factors, which R uses to represent categorical 
+variables with fixed possible values.
+#date stands for dates.
+
+#Pick observations by their values (filter()).
+#Reorder the rows (arrange()).
+#Pick variables by their names (select()).
+#Create new variables with functions of existing variables (mutate()). & transmute()
+#Collapse many values down to a single summary (summarise())
+
+used in conjunction with group_by() which changes the scope of each function 
+from operating on the entire dataset to operating on it group-by-group
+
+5.2 Filter rows with filter()
+
+filter(flights, month==1, day==1)
+jan1<- filter(flights, month==1, day==1)
+
+jan1
+
+dec25<-filter(flights, month==12,day==25)
+
+dec25
+
+5.2.1 Comparisons
+
+#R provides the standard suite: >, >=, <, <=, != (not equal), and == (equal).
+
+5.2.2 Logical operators
+
+Multiple arguments to filter() are combined with “and”: 
+every expression must be true in order for a row to be included in the output.
+Boolean operators yourself: & is “and”, | is “or”, and ! is “not”.
+
+The following code finds all flights that departed in November or December
+filter(flights, month == 11 | month == 12)
+
+alternative, hort-hand for this problem is x %in% y
+
+nov_dec<-filter(flights, month %in% c(11,12))
+
+nov_dec
+
+filter(flights, !(arr_delay>120|dep_delay>120))
+
+filter(flights, arr_delay <= 120, dep_delay <= 120)
