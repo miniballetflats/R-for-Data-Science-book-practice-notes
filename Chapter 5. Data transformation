@@ -124,6 +124,7 @@ filter(flights, arr_delay>=120)
 #Flew to Houston (IAH or HOU)
 https://www.transtats.bts.gov/DL_SelectFields.asp?Table_ID=236
 filter(flights, dest=="IAH"|dest=="HOU")
+filter(flights, dest %in% c("IAH", "HOU"))
 
 #Were operated by United, American, or Delta
 https://www.transtats.bts.gov/DL_SelectFields.asp?Table_ID=236
@@ -131,9 +132,50 @@ UA	United Air Lines Inc.
 AA	American Airlines Inc.
 DL	Delta Air Lines Inc.
 filter(flights, carrier=="AA"|carrier=="UA"|carrier=="DL")
+filter(flights, carrier %in% c("AA", "DL", "UA"))
 
 Departed in summer (July, August, and September)
 filter(flights, month==7|month==8|month==9)
 filter(flights, month %in% c(7,8,9))
+filter(flights, month %in% 7:9)
 filter(flights, !(month %in% c(1,2,3,4,5,6,10,11,12)))
 
+Arrived more than two hours late, but didn’t leave late
+filter(flights, arr_delay>120 & dep_delay<=0)
+
+Were delayed by at least an hour, but made up over 30 minutes in flight
+# For example, if dep_delay is 10 minutes late then arr_delay should be
+# 10 mins lates. 10 - 10 = 0, so air time was on time.
+# If dep_delay is 10 minutes late but arr_delay  is -20 minutes earlier, then
+# arr_delay SHOULD'VE been 10 but instead is -20 (because of 30 catch up), so
+# 10 - (-20) = 30.
+filter(flights, dep_delay >= 60, (dep_delay - arr_delay > 30))
+
+Departed between midnight and 6am (inclusive)
+filter(flights, dep_time >= 2400 | dep_time <= 600)
+
+Another useful dplyr filtering helper is between(). 
+What does it do? Can you use it to simplify the code needed to 
+answer the previous challenges?
+filter(flights, between(dep_time, 601, 2359))
+
+How many flights have a missing dep_time? 
+What other variables are missing? 
+What might these rows represent?
+sum(is.na(flights$dep_time))
+
+Why is NA ^ 0 not missing? Why is NA | TRUE not missing? 
+  Why is FALSE & NA not missing? Can you figure out the general rule? 
+  (NA * 0 is a tricky counterexample!)
+
+Because anything that is `^ 0` equals `1`.
+Because NA | TRUE is saying whether one of the 
+two is `TRUE` and the second one is.
+Because at least one of the two expressions can be tested: 
+  FALSE & NA. In NA & NA neither can be tested and the results is `NA & NA`.
+
+The general rule is that whenever there is a logical expressions, 
+if one can be tested, then the result shouldn't be `NA`. 
+And any operation that the results is determined, 
+regardless of the number, 
+the inputting `NA` does not affect the result.
