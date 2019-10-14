@@ -393,4 +393,108 @@ y<- c(1,2,2,NA,3,4)
 > cume_dist(y)
 [1] 0.2 0.6 0.6  NA 0.8 1.0
 
+5.5.2 Exercises
 
+transmute(flights, dep_time,
+hour = dep_time %/% 100,
+minute = dep_time %% 100
+)
+
+# A tibble: 336,776 x 3
+   dep_time  hour minute
+      <int> <dbl>  <dbl>
+ 1      517     5     17
+ 2      533     5     33
+ 3      542     5     42
+ 4      544     5     44
+ 5      554     5     54
+ 6      554     5     54
+ 7      555     5     55
+ 8      557     5     57
+ 9      557     5     57
+10      558     5     58
+# ... with 336,766 more rows
+
+transmute(flights, sched_dep_time,
+hour = dep_time %/% 100,
+minute = dep_time %% 100
+)
+
+# A tibble: 336,776 x 3
+   sched_dep_time  hour minute
+            <int> <dbl>  <dbl>
+ 1            515     5     17
+ 2            529     5     33
+ 3            540     5     42
+ 4            545     5     44
+ 5            600     5     54
+ 6            558     5     54
+ 7            600     5     55
+ 8            600     5     57
+ 9            600     5     57
+10            600     5     58
+# ... with 336,766 more rows
+
+5.5.2 Exercises
+
+Currently dep_time and sched_dep_time are convenient to look at, 
+but hard to compute with because they’re not really continuous numbers. 
+Convert them to a more convenient representation of number of minutes since midnight.
+
+# dep_time in mins
+
+transmute(flights, dep_time,
+hour = dep_time %/% 100*60,
+minute = dep_time %% 100,
+total =hour+minute
+)
+
+# A tibble: 336,776 x 4
+   dep_time  hour minute total
+      <int> <dbl>  <dbl> <dbl>
+ 1      517   300     17   317
+ 2      533   300     33   333
+ 3      542   300     42   342
+ 4      544   300     44   344
+ 5      554   300     54   354
+ 6      554   300     54   354
+ 7      555   300     55   355
+ 8      557   300     57   357
+ 9      557   300     57   357
+10      558   300     58   358
+# ... with 336,766 more rows
+
+# sched_dep_time in mins
+
+transmute(flights, sched_dep_time,
+hour = sched_dep_time %/% 100*60,
+minute = sched_dep_time %% 100,
+total =hour+minute
+)
+
+# A tibble: 336,776 x 4
+   sched_dep_time  hour minute total
+            <int> <dbl>  <dbl> <dbl>
+ 1            515   300     15   315
+ 2            529   300     29   329
+ 3            540   300     40   340
+ 4            545   300     45   345
+ 5            600   360      0   360
+ 6            558   300     58   358
+ 7            600   360      0   360
+ 8            600   360      0   360
+ 9            600   360      0   360
+10            600   360      0   360
+# ... with 336,766 more rows
+
+
+Compare air_time with arr_time - dep_time. 
+What do you expect to see? 
+What do you see? What do you need to do to fix it?
+
+was not able to solve. 
+Answer from https://github.com/cimentadaj/R4DS-Solutions/blob/master/Ch3.Rmd
+
+hours2mins <- function(x) {
+  x %/% 100 * 60 + x %% 100
+}
