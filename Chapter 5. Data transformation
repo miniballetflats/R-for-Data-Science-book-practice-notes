@@ -223,13 +223,13 @@ Which flights travelled the longest? Which travelled the shortest?
 
 #longest
 flights %>%
-+ arrange(air_time) %>%
-+ select(carrier, flight, air_time)
++ arrange(desc(air_time)) %>%
++ select(carrier,tailnum, flight, air_time)
 
 #shortest
 flights %>%
-+     arrange(-air_time) %>%
-+     select(carrier, flight, air_time)
++ arrange(-desc(air_time)) %>%
++ select(carrier,tailnum, flight, air_time)
 
 5.4 Select columns with select()
 select() allows you to rapidly zoom in on a useful subset using operations based on the names of the variables
@@ -272,6 +272,8 @@ Does the result of running the following code surprise you? How do the select he
 
 select(flights, contains("TIME"))
 select(flights, contains("TIME", ignore.case = F))
+
+
 
 5.5 Add new variables with mutate()
 
@@ -335,12 +337,18 @@ transmute(flights_sml,
 
 5.5.1 Useful creation functions
 
-Arithmetic operators: +, -, *, /, ^. These are all vectorised, 
-using the so called “recycling rules”. 
-If one parameter is shorter than the other, 
-it will be automatically extended to be the same length. 
-This is most useful when one of the arguments is a 
-single number: air_time / 60, hours * 60 + minute, etc.
+5.5.1 Useful creation functions
+
+Arithmetic operators: +, -, *, /, ^. These are all vectorised, using the so called “recycling rules”. 
+If one parameter is shorter than the other, it will be automatically extended to be the same length. 
+This is most useful when one of the arguments is a single number: air_time / 60, hours * 60 + minute, etc.
+
+Arithmetic operators are also useful in conjunction with the aggregate functions you’ll learn about later. 
+For example, x / sum(x) calculates the proportion of a total, and y - mean(y) computes the difference from the mean.
+
+Modular arithmetic: %/% (integer division) and %% (remainder), where x == y * (x %/% y) + (x %% y). 
+Modular arithmetic is a handy tool because it allows you to break integers up into pieces. 
+For example, in the flights dataset, you can compute hour and minute from dep_time with:
 
 Modular arithmetic: %/% (integer division) and %% (remainder)
 
