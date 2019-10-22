@@ -762,3 +762,112 @@ get more insight if we draw a scatterplot of number of flights vs. average delay
 ggplot(data = delays, mapping = aes(x = n, y = delay)) + 
   geom_point(alpha = 1/10)
 
+
+
+install.packages("Lahman")
+
+library("Lahman")
+
+# Convert to a tibble so it prints nicely
+batting <- as_tibble(Lahman::Batting)
+
+batters<- batting %>%
+  + group_by(playerID) %>%
+  + summarise(
+    + ba= sum(H, na.rm =TRUE)/ sum(AB, na.rm=TRUE),
+    + ab= sum(AB, na.rm= TRUE)
+    + )
+
+batters %>%
+  + filter(ab> 100) %>%
+  + ggplot(mapping= aes(x=ab, y=ba))+
+  + geom_point()+
+  + geom_smooth(se=FALSE)
+
+
+
+> batters %>%
+  + arrange( desc(ba))
+# A tibble: 19,428 x 3
+playerID     ba    ab
+<chr>     <dbl> <int>
+  1 abramge01     1     1
+2 alberan01     1     1
+3 allarko01     1     1
+4 banisje01     1     1
+5 bartocl01     1     1
+6 bassdo01      1     1
+7 birasst01     1     2
+8 bruneju01     1     1
+9 burnscb01     1     1
+10 cammaer01     1     1
+# ... with 19,418 more rows
+
+5.6.4 Useful summary functions
+
+> not_cancelled %>%
+  + group_by(year, month, day) %>%
+  + summarise(
+    + avg_delay1=mean(arr_delay),
+    + avg_delay2=mean(arr_delay[arr_delay>0]))
+# A tibble: 365 x 5
+# Groups:   year, month [12]
+year month   day avg_delay1 avg_delay2
+<int> <int> <int>      <dbl>      <dbl>
+  1  2013     1     1     12.7         32.5
+2  2013     1     2     12.7         32.0
+3  2013     1     3      5.73        27.7
+4  2013     1     4     -1.93        28.3
+5  2013     1     5     -1.53        22.6
+6  2013     1     6      4.24        24.4
+7  2013     1     7     -4.95        27.8
+8  2013     1     8     -3.23        20.8
+9  2013     1     9     -0.264       25.6
+10  2013     1    10     -5.90        27.3
+# ... with 355 more rows
+
+not_cancelled %>%
+  + group_by(dest) %>%
+  + summarise(distance_sd = sd(distance)) %>%
+  + arrange(desc(distance_sd))
+# A tibble: 104 x 2
+dest  distance_sd
+<chr>       <dbl>
+  1 EGE         10.5 
+2 SAN         10.4 
+3 SFO         10.2 
+4 HNL         10.0 
+5 SEA          9.98
+6 LAS          9.91
+7 PDX          9.87
+8 PHX          9.86
+9 LAX          9.66
+10 IND          9.46
+# ... with 94 more rows
+> 
+  
+  # When do the first and last flights leave each day?
+
+  > not_cancelled %>%
+  + group_by (year, month, day) %>%
+  + summarise(
+    + first_dep= first(dep_time),
+    + last_dep=last(dep_time)
+    + )
+# A tibble: 365 x 5
+# Groups:   year, month [12]
+year month   day first_dep last_dep
+<int> <int> <int>     <int>    <int>
+  1  2013     1     1       517     2356
+2  2013     1     2        42     2354
+3  2013     1     3        32     2349
+4  2013     1     4        25     2358
+5  2013     1     5        14     2357
+6  2013     1     6        16     2355
+7  2013     1     7        49     2359
+8  2013     1     8       454     2351
+9  2013     1     9         2     2252
+10  2013     1    10         3     2320
+# ... with 355 more rows
+
+
