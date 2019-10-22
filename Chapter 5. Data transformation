@@ -601,4 +601,164 @@ In 1:10 + 1:3 :
   longer object length is not a multiple of shorter object length
   
  What trigonometric functions does R provide?
+ ? Trig
+ 
+5.6 Grouped summaries with summarise()
+summarise(flights, delay = mean(dep_delay, na.rm= TRUE))
+# A tibble: 1 x 1
+delay
+<dbl>
+  1  12.6
+
+> by_day <- group_by(flights, year, month, day)
+> summarise( by_day, delay= mean(dep_delay, na.rm=TRUE))
+# A tibble: 365 x 4
+# Groups:   year, month [12]
+year month   day delay
+<int> <int> <int> <dbl>
+  1  2013     1     1 11.5 
+2  2013     1     2 13.9 
+3  2013     1     3 11.0 
+4  2013     1     4  8.95
+5  2013     1     5  5.73
+6  2013     1     6  7.15
+7  2013     1     7  5.42
+8  2013     1     8  2.55
+9  2013     1     9  2.28
+10  2013     1    10  2.84
+# ... with 355 more rows
+
+5.6.1 Combining multiple operations with the pipe
+
+magine that we want to explore the relationship between the distance and 
+average delay for each location. Using what you know about dplyr, you might 
+write code like this:
+
+  > by_dest <- group_by(flights, dest)
+> delay<-summarise(by_dest,
+                   + count=n(),
+                   + dist=mean(distance, na.rm=TRUE),
+                   + delay=mean(arr_delay, na.rm=TRUE)
+                   + )
+
+
+> delay <- filter(delay, count > 20, dest != "HNL")
+
+ggplot(data=delay, mapping=aes(x=dist, y= delay))+
+  +    geom_point(aes(size=count),alpha=1/3, color=2)+
+  +    geom_smooth()
+
+There are three steps to prepare this data:
+Group flights by destination.
+Summarise to compute distance, average delay, and number of flights.
+Filter to remove noisy points and Honolulu airport, 
+which is almost twice as far away as the next closest airport.
+
+There’s another way to tackle the same problem with the pipe, %>%:
   
+  delays <- flights %>% 
+  group_by(dest) %>% 
+  summarise(
+    count = n(),
+    dist = mean(distance, na.rm = TRUE),
+    delay = mean(arr_delay, na.rm = TRUE)
+  ) %>% 
+  filter(count > 20, dest != "HNL")
+
+5.6.2 Missing values
+
+if we don’t set na.rm argument
+
+> flights %>%
+  + group_by(year, month, day) %>%
+  + summarise(mean=mean(dep_delay))
+# A tibble: 365 x 4
+# Groups:   year, month [12]
+year month   day  mean
+<int> <int> <int> <dbl>
+  1  2013     1     1    NA
+2  2013     1     2    NA
+3  2013     1     3    NA
+4  2013     1     4    NA
+5  2013     1     5    NA
+6  2013     1     6    NA
+7  2013     1     7    NA
+8  2013     1     8    NA
+9  2013     1     9    NA
+10  2013     1    10    NA
+# ... with 355 more rows
+
+#Adding na.rm=TRUE
+
+> flights %>%
+  + group_by(year,month,day) %>%
+  + summarise(mean=mean(dep_delay, na.rm=TRUE))
+# A tibble: 365 x 4
+# Groups:   year, month [12]
+year month   day  mean
+<int> <int> <int> <dbl>
+  1  2013     1     1 11.5 
+2  2013     1     2 13.9 
+3  2013     1     3 11.0 
+4  2013     1     4  8.95
+5  2013     1     5  5.73
+6  2013     1     6  7.15
+7  2013     1     7  5.42
+8  2013     1     8  2.55
+9  2013     1     9  2.28
+10  2013     1    10  2.84
+# ... with 355 more rows
+
+#HOW TO REMOVE CANCELLED FLIGHTS.
+remove parts without values
+
+> not_cancelled <- flights %>%
+  + filter(!is.na(dep_delay), !is.na(arr_delay))
+> 
+  > not_cancelled %>%
+  + group_by(year,month, day) %>%
+  + summarise(mean=mean(dep_delay))
+# A tibble: 365 x 4
+# Groups:   year, month [12]
+year month   day  mean
+<int> <int> <int> <dbl>
+  1  2013     1     1 11.4 
+2  2013     1     2 13.7 
+3  2013     1     3 10.9 
+4  2013     1     4  8.97
+5  2013     1     5  5.73
+6  2013     1     6  7.15
+7  2013     1     7  5.42
+8  2013     1     8  2.56
+9  2013     1     9  2.30
+10  2013     1    10  2.84
+# ... with 355 more rows
+
+5.6.3 Counts
+Whenever you do any aggregation, 
+it’s always a good idea to include either a count (n()), 
+or a count of non-missing values (sum(!is.na(x)))
+
+For example, let’s look at the planes (identified by their tail number) that have the highest average delays:
+
+  > delays <- not_cancelled %>%
+  + group_by(tailnum) %>%
+  + summarise(
+    + delay=mean(arr_delay))
+
+  > ggplot(data=delays, mapping= aes(x=delay))+
+  + geom_freqpoly(binwidth=10)
+
+The story is actually a little more nuanced. 
+get more insight if we draw a scatterplot of number of flights vs. average delay:
+  
+  delays <- not_cancelled %>% 
+  group_by(tailnum) %>% 
+  summarise(
+    delay = mean(arr_delay, na.rm = TRUE),
+    n = n()
+  )
+
+ggplot(data = delays, mapping = aes(x = n, y = delay)) + 
+  geom_point(alpha = 1/10)
+
