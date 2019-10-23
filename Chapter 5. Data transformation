@@ -870,4 +870,78 @@ year month   day first_dep last_dep
 10  2013     1    10         3     2320
 # ... with 355 more rows
 
+Batters Data Set
+batting <- as_tibble(Lahman::Batting)
+> 
+  > batting
+# A tibble: 105,861 x 22
+playerID yearID stint teamID lgID      G    AB     R     H   X2B   X3B    HR   RBI    SB    CS    BB
+<chr>     <int> <int> <fct>  <fct> <int> <int> <int> <int> <int> <int> <int> <int> <int> <int> <int>
+  1 abercda~   1871     1 TRO    NA        1     4     0     0     0     0     0     0     0     0     0
+2 addybo01   1871     1 RC1    NA       25   118    30    32     6     0     0    13     8     1     4
+3 allisar~   1871     1 CL1    NA       29   137    28    40     4     5     0    19     3     1     2
+4 allisdo~   1871     1 WS3    NA       27   133    28    44    10     2     2    27     1     1     0
+5 ansonca~   1871     1 RC1    NA       25   120    29    39    11     3     0    16     6     2     2
+6 armstbo~   1871     1 FW1    NA       12    49     9    11     2     1     0     5     0     1     0
+7 barkeal~   1871     1 RC1    NA        1     4     0     1     0     0     0     2     0     0     1
+8 barnero~   1871     1 BS1    NA       31   157    66    63    10     9     0    34    11     6    13
+9 barrebi~   1871     1 FW1    NA        1     5     1     1     1     0     0     1     0     0     0
+10 barrofr~   1871     1 BS1    NA       18    86    13    13     2     1     0    11     1     0     0
+# ... with 105,851 more rows, and 6 more variables: SO <int>, IBB <int>, HBP <int>, SH <int>, SF <int>,
+
+
+batters <- batting %>%
+  group_by(playerID) %>%
+  summarise(
+    ba=sum(H, na.rm=TRUE/ sum(AB, na.rm=TRUE),
+    ab=sum(AB, na.rm=TRUE)
+    )
+    
+batters
+
+> batters
+# A tibble: 19,428 x 3
+playerID      ba    ab
+<chr>      <dbl> <int>
+  1 aardsda01 0          4
+2 aaronha01 0.305  12364
+3 aaronto01 0.229    944
+4 aasedo01  0          5
+5 abadan01  0.0952    21
+6 abadfe01  0.111      9
+7 abadijo01 0.224     49
+8 abbated01 0.254   3044
+9 abbeybe01 0.169    225
+10 abbeych01 0.281   1756
+# ... with 19,418 more rows
+
+#CONVERT batters to a ggplot
+
+batters %>%
+  filter(ab>100) %>%
+  ggplot(mapping=aes(x=ab,y=ba))+
+  geom_point()+
+  geom_smooth(se=FALSE)
+
+naively sort on desc(ba), 
+people with the best batting averages are clearly lucky, 
+NOT SKILLED:
+  > batters %>%
+  + arrange(desc(ba))
+# A tibble: 19,428 x 3
+playerID     ba    ab
+<chr>     <dbl> <int>
+  1 abramge01     1     1
+2 alberan01     1     1
+3 allarko01     1     1
+4 banisje01     1     1
+5 bartocl01     1     1
+6 bassdo01      1     1
+7 birasst01     1     2
+8 bruneju01     1     1
+9 burnscb01     1     1
+10 cammaer01     1     1
+# ... with 19,418 more rows
+
+5.6.4 Useful summary functions
 
