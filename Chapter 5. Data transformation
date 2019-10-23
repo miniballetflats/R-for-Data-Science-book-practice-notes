@@ -1052,3 +1052,222 @@ year month   day fist_dep last_dep
 # ... with 355 more rows
 
 Filtering gives you all variables, with each observation in a separate row:
+
+ 
+  not_cancelled %>%
+  group_by(year, month, day) %>%
+  mutate(r=min_rank(desc(dep_time))) %>%
+  filter( r %in% range (r))
+
+# A tibble: 770 x 20
+# Groups:   year, month, day [365]
+year month   day dep_time sched_dep_time dep_delay arr_time sched_arr_time arr_delay carrier flight
+<int> <int> <int>    <int>          <int>     <dbl>    <int>          <int>     <dbl> <chr>    <int>
+  1  2013     1     1      517            515         2      830            819        11 UA        1545
+2  2013     1     1     2356           2359        -3      425            437       -12 B6         727
+3  2013     1     2       42           2359        43      518            442        36 B6         707
+4  2013     1     2     2354           2359        -5      413            437       -24 B6         727
+5  2013     1     3       32           2359        33      504            442        22 B6         707
+6  2013     1     3     2349           2359       -10      434            445       -11 B6         739
+7  2013     1     4       25           2359        26      505            442        23 B6         707
+8  2013     1     4     2358           2359        -1      429            437        -8 B6         727
+9  2013     1     4     2358           2359        -1      436            445        -9 B6         739
+10  2013     1     5       14           2359        15      503            445        18 B6         739
+# ... with 760 more rows, and 9 more variables: tailnum <chr>, origin <chr>, dest <chr>, air_time <dbl>,
+#   distance <dbl>, hour <dbl>, minute <dbl>, time_hour <dttm>, r <int>
+
+To count the number of non-missing values, use sum(!is.na(x)). 
+To count the number of distinct (unique) values, use n_distinct(x)
+
+# Which destinations have the most carriers?
+
+not_cancelled %>%
+  group_by(dest) %>%
+  summarise(carriers= n_distinct(carrier)) %>%
+  arrange(desc(carriers))
+
+# A tibble: 104 x 2
+dest  carriers
+<chr>    <int>
+  1 ATL          7
+2 BOS          7
+3 CLT          7
+4 ORD          7
+5 TPA          7
+6 AUS          6
+7 DCA          6
+8 DTW          6
+9 IAD          6
+10 MSP          6
+# ... with 94 more rows
+
+Counts are so useful that dplyr provides a simple helper if all you want is a count:
+  not_cancelled %>%
+  count(dest) %>%
+
+  # A tibble: 104 x 2
+  dest      n
+<chr> <int>
+  1 XNA     992
+2 TYS     578
+3 TVC      95
+4 TUL     294
+5 TPA    7390
+6 SYR    1707
+7 STT     518
+8 STL    4142
+9 SRQ    1201
+10 SNA     812
+# ... with 94 more rows
+
+not_cancelled %>%
+  count(dest) %>%
+  arrange(desc(n))
+
+# A tibble: 104 x 2
+dest      n
+<chr> <int>
+  1 ATL   16837
+2 ORD   16566
+3 LAX   16026
+4 BOS   15022
+5 MCO   13967
+6 CLT   13674
+7 SFO   13173
+8 FLL   11897
+9 MIA   11593
+10 DCA    9111
+# ... with 94 more rows
+
+“count” (sum) the total number of miles a plane flew
+
+not_cancelled %>%
+  count(tailnum, wt=distance)
+
+# A tibble: 4,037 x 2
+tailnum      n
+<chr>    <dbl>
+  1 D942DN    3418
+2 N0EGMQ  239143
+3 N10156  109664
+4 N102UW   25722
+5 N103US   24619
+6 N104UW   24616
+7 N10575  139903
+8 N105UW   23618
+9 N107US   21677
+10 N108UW   32070
+# ... with 4,027 more rows
+
+not_cancelled %>%
+  count(tailnum, wt=distance) %>%
+  arrange(desc(n))
+
+# A tibble: 4,037 x 2
+tailnum      n
+<chr>    <dbl>
+  1 N328AA  929090
+2 N338AA  921172
+3 N335AA  902271
+4 N327AA  900482
+5 N323AA  839468
+6 N319AA  837924
+7 N336AA  833136
+8 N329AA  825826
+9 N324AA  786159
+10 N339AA  783648
+
+not_cancelled %>%
+  count(tailnum, wt=distance) %>%
+  arrange(-desc(n))
+
+# A tibble: 4,037 x 2
+tailnum     n
+<chr>   <dbl>
+  1 N505SW    185
+2 N746SK    229
+3 N881AS    292
+4 N824AS    296
+5 N701SK    419
+6 N702SK    419
+7 N705SK    419
+8 N710SK    419
+9 N726SK    419
+10 N740SK    419
+# ... with 4,027 more rows
+
+# How many flights left before 5am? (these usually indicate delayed
+# flights from the previous day)
+
+not_cancelled %>%
+  group_by(year,month, day) %>%
+  summarise(n_early=sum(dep_time<500))
+
+# A tibble: 365 x 4
+# Groups:   year, month [12]
+year month   day n_early
+<int> <int> <int>   <int>
+  1  2013     1     1       0
+2  2013     1     2       3
+3  2013     1     3       4
+4  2013     1     4       3
+5  2013     1     5       3
+6  2013     1     6       2
+7  2013     1     7       2
+8  2013     1     8       1
+9  2013     1     9       3
+10  2013     1    10       3
+# ... with 355 more rows
+
+> # What proportion of flights are delayed by more than an hour?
+
+  > not_cancelled %>%
+  + group_by(year, month, day) %>%
+  + summarise(hour_perc=mean(arr_delay>60))
+
+# A tibble: 365 x 4
+# Groups:   year, month [12]
+year month   day hour_perc
+<int> <int> <int>     <dbl>
+  1  2013     1     1    0.0722
+2  2013     1     2    0.0851
+3  2013     1     3    0.0567
+4  2013     1     4    0.0396
+5  2013     1     5    0.0349
+6  2013     1     6    0.0470
+7  2013     1     7    0.0333
+8  2013     1     8    0.0213
+9  2013     1     9    0.0202
+10  2013     1    10    0.0183
+# ... with 355 more rows
+
+#flights that left before 5 and has 10 minutes delay
+# can combine, summary
+not_cancelled %>%
+  group_by(year, month, day) %>%
+  summarise(n_early=sum(dep_time<500, hour_perc=mean(arr_delay>10))
+  )
+
+# A tibble: 365 x 4
+# Groups:   year, month [12]
+year month   day n_early
+<int> <int> <int>   <dbl>
+  1  2013     1     1   0.367
+2  2013     1     2   3.37 
+3  2013     1     3   4.34 
+4  2013     1     4   3.21 
+5  2013     1     5   3.17 
+6  2013     1     6   2.29 
+7  2013     1     7   2.14 
+8  2013     1     8   1.15 
+9  2013     1     9   3.18 
+10  2013     1    10   3.12 
+# ... with 355 more rows
+
+5.6.5 Grouping by multiple variables
+
+group by multiple variables, 
+each summary peels off one level of the grouping. 
+that makes it easy to progressively roll up a dataset:
+
+ 
