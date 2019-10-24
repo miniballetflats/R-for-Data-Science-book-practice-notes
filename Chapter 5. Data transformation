@@ -1346,3 +1346,44 @@ daily %>%
   
   5.6.7 Exercises
   
+delay_char <-
+  flights %>%
+  group_by(flight) %>%
+  summarise(n = n(),
+            fifteen_early = mean(arr_delay == -15, na.rm = T),
+            fifteen_late = mean(arr_delay == 15, na.rm = T),
+            ten_always = mean(arr_delay == 10, na.rm = T),
+            thirty_early = mean(arr_delay == -30, na.rm = T),
+            thirty_late = mean(arr_delay == 30, na.rm = T),
+            percentage_on_time = mean(arr_delay == 0, na.rm = T),
+            twohours = mean(arr_delay > 120, na.rm = T)) %>%
+  map_if(is_double, round, 2) %>%
+  as_tibble()
+
+delay_char
+
+?mean
+             
+delay_char %>%
+  filter(fifteen_early==-0.5,fifteen_late==0.5)
+# A tibble: 0 x 9
+# ... with 9 variables: flight <int>, n <int>, fifteen_early <dbl>, fifteen_late <dbl>, ten_always <dbl>,
+#   thirty_early <dbl>, thirty_late <dbl>, percentage_on_time <dbl>, twohours <dbl>
+
+delay_char %>%
+  +     filter(ten_always == 1)
+# A tibble: 5 x 9
+flight     n fifteen_early fifteen_late ten_always thirty_early thirty_late percentage_on_time twohours
+<int> <int>         <dbl>        <dbl>      <dbl>        <dbl>       <dbl>              <dbl>    <dbl>
+  1   2254     1             0            0          1            0           0                  0        0
+2   3656     1             0            0          1            0           0                  0        0
+3   3785     2             0            0          1            0           0                  0        0
+4   3880     1             0            0          1            0           0                  0        0
+5   5854     1             0            0          1            0           0                  0        0
+> 
+  
+  > delay_char %>%
+  +     filter(thirty_early == 0.5 & thirty_late == 0.5)
+# A tibble: 0 x 9
+# ... with 9 variables: flight <int>, n <int>, fifteen_early <dbl>, fifteen_late <dbl>, ten_always <dbl>,
+#   thirty_early <dbl>, thirty_late <dbl>, percentage_on_time <dbl>, twohours <dbl>
